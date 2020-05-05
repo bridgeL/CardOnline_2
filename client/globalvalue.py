@@ -23,8 +23,8 @@ name_dict = dict()
 # 自己的座位号
 site_num = -1
 
-# 座位列表 <site_num, dev_num>
-site_dict = dict()
+# 座位列表 [dev_num,...] 最多8人
+site_list = [0, 0, 0, 0, 0, 0, 0, 0]
 
 # 自己在游戏中的阵营
 group = 0

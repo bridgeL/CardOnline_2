@@ -24,17 +24,20 @@ dev = GAMEDEVICELIST()
 # 昵称列表 <dev_num, name>
 name_dict = dict()
 
-# 座位列表 <site_num, dev_num>
-site_dict = dict()
+# 座位列表 <site_num, dev_num>  最多8人
+site_list = [0, 0, 0, 0, 0, 0, 0, 0]
 
 # 当前玩家的座位号
 current_site_num = 0
 
-# 玩家手牌列表 <site_num, card_dict>
-player_card_dict = dict()
+# 本局游戏的玩家数
+player_num = 0
+
+# 玩家手牌列表 <site_num, card_list>
+player_card_list = [[], [], [], [], [], [], [], []]
 
 # 阵营列表 <site_num, group_num>
-group_dict = dict()
+group_list = [0, 0, 0, 0, 0, 0, 0, 0]
 
 # 游戏页
 game_page = 1

@@ -72,3 +72,5 @@ def deal_msg():
             gamectrl.answer_site_set(m)
         elif t == 3:
             gamectrl.answer_game_start(m)
+        elif t == 11:
+            gamectrl.answer_exit(m)

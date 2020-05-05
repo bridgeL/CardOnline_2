@@ -2,6 +2,15 @@ import globalvalue as gv
 import communication as com
 
 
+def answer_exit(msg):
+    '''
+        11号消息
+        客户端设备号，0，11
+    '''
+    dev_num = msg.send
+    del gv.dev.dict[dev_num]
+
+
 def answer_name_set(msg):
     '''
         1号消息
@@ -34,29 +43,22 @@ def answer_site_set(msg):
 
     dev_num = msg.send
     bs = msg.MSG2BYTE()
+    site_num = msg.msg[0]
 
-    if gv.game_page == 1:
-        site_num = msg.msg[0]
-        site_dict = gv.site_dict
+    if gv.game_page == 1 and site_num < 8:
 
         # 非空座
-        if site_num in site_dict.keys():
+        if gv.site_list[site_num] != 0:
             m_ans = com.GAMEMSG(0, dev_num, -1, bs)
             com.send(m_ans)
 
         # 空座
         else:
-            # keys() 与 values() 一一对应，因此根据value查询values下标即可反推出keys中的key
-            site_dict_k = list(site_dict.keys())
-            site_dict_v = list(site_dict.values())
-            site_num_old = -1
-            if dev_num in site_dict_v:
-                site_num_old = site_dict_k[site_dict_v.index(dev_num)]
+            if dev_num in gv.site_list:
+                gv.site_list[gv.site_list.index(dev_num)] = 0
 
-            if site_num_old != -1:
-                del gv.site_dict[site_num_old]
-
-            gv.site_dict[site_num] = dev_num
+            gv.site_list[site_num] = dev_num
+            print('site_list', gv.site_list)
 
             m_ans = com.GAMEMSG(0, dev_num, 0, bs)
             m_all = com.GAMEMSG(0, 0, -2, bs)
@@ -78,82 +80,80 @@ def answer_game_start(msg):
 
     if gv.game_page == 1:
 
-        site_dict = gv.site_dict
         # 首位有人坐
-        if 0 in site_dict.keys():
-            if site_dict[0] == dev_num:
-                player_num = site_dict.__len__()
+        if gv.site_list[0] == dev_num:
+            player_num = 0
+            for s in gv.site_list:
+                if s != 0:
+                    player_num = player_num + 1
 
-                if player_num >= 4:
-                    m_ans = com.GAMEMSG(0, dev_num, 0, bs)
-                    m_all = com.GAMEMSG(0, 0, -2, bs)
-                    com.send(m_ans)
-                    com.send(m_all)
+            if player_num >= 4:
+                m_ans = com.GAMEMSG(0, dev_num, 0, bs)
+                m_all = com.GAMEMSG(0, 0, -2, bs)
+                com.send(m_ans)
+                com.send(m_all)
 
-                    # 游戏开始
-                    gv.game_page = 2
+                gv.player_num = player_num
+                set_game_page(2)
+                return
 
-                    # 重新生成紧密排列的座位表
-
-                    # 生成牌库，洗牌，发牌
-                    # build_deck()
-
-                    # 查找第一发现人
-                    return
     m_ans = com.GAMEMSG(0, dev_num, -1, bs)
     com.send(m_ans)
 
 
-# def build_deck():
-#     '''
-#         创建牌组，洗牌，并分配初始手牌
+def set_game_page(page):
 
-#         普通人 0
-#         不在场证明 1
-#         第一发现人 2
-#         共犯 3
-#         目击者 4
-#         谣言 5
-#         情报交换 6
-#         交易 7
-#         犯人 8
-#         侦探 9
-#         神犬 10
+    if(page == 2):
+        # 游戏开始
+        gv.game_page = 2
 
-#         -12号消息
-#         0，客户端设备号，消息号，1 + 2*卡牌个数，[自己/其他人设备号,[卡牌id,卡牌type],...]
+        # 重新生成紧密排列的座位表
+        new_site_list = [0, 0, 0, 0, 0, 0, 0, 0]
+        cnt = 0
+        for s in gv.site_list:
+            if s != 0:
+                new_site_list[cnt] = s
+                cnt = cnt + 1
 
-#     '''
-#     player_num = gv.site_dict.__len__()
-#     card_num = player_num * 4
+        gv.site_list = new_site_list
 
-#     # <card_id, card_type>
-#     deck = dict()
+        # 生成牌库，洗牌，发牌
+        '''
+            普通人 0
+            不在场证明 1
+            第一发现人 2
+            共犯 3
+            目击者 4
+            谣言 5
+            情报交换 6
+            交易 7
+            犯人 8
+            侦探 9
+            神犬 10
+        '''
+        card_deck = []
+        player_num = gv.player_num
+        card_num = player_num * 4
+        for i in range(card_num):
+            card_deck.append(0)
 
-#     # 全部是普通人
-#     for i in range(card_num):
-#         deck[i] = 0
+        # 洗牌
 
-#     # 洗牌
+        # 发牌
+        for i in range(player_num):
+            gv.player_card_list[i] = []
 
-#     # 发牌
+        cnt = 0
+        for c in card_deck:
+            gv.player_card_list[cnt].append(c)
+            cnt = cnt + 1
+            if cnt >= player_num:
+                cnt = 0
 
-#     site_order_list = gv.site_order_list
-#     for site_num in site_order_list:
-#         gv.player_card_dict[site_num] = dict()
+        for i in range(player_num):
+            dev_num = new_site_list[i]
+            bs = bytes([dev_num] + gv.player_card_list[i])
+            m = com.GAMEMSG(0, dev_num, -3, bs)
+            com.send(m)
 
-#     for i in range(card_num):
-#         site_num = site_order_list[i % player_num]
-#         gv.player_card_dict[site_num][i] = deck[i]
-
-#     site_dict = gv.site_dict
-#     for site_num in site_order_list:
-#         card_list = gv.player_card_dict[site_num]
-#         dev_num = site_dict[site_num]
-#         bs = bytes([])
-#         for card_id in card_list.keys():
-#             card_type = card_list[card_id]
-#             bs = bs + bytes([card_id, card_type])
-#         msg = com.GAMEMSG(0, dev_num, -12, 2*4+1,
-#                           bytes([dev_num]) + bs)
-#         com.send(msg)
+        # 查找第一发现人

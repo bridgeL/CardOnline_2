@@ -1,7 +1,13 @@
 import globalvalue as gv
 import communication as com
 
+
 ''' ''' ''' ''' ''' ''' ''' ''' ''' require ''' ''' ''' ''' ''' ''' ''' ''' '''
+
+
+def require_login():
+    gv.game_page = 1
+    com.connect()
 
 
 def require_name_set(name):
@@ -129,21 +135,14 @@ def told_site_set(msg):
         dev_num = msg.send
         site_num = msg.msg[0]
 
-        site_dict = gv.site_dict
-        # keys() 与 values() 一一对应，因此根据value查询values下标即可反推出keys中的key
-        site_dict_k = list(site_dict.keys())
-        site_dict_v = list(site_dict.values())
-        site_num_old = -1
-        if dev_num in site_dict_v:
-            site_num_old = site_dict_k[site_dict_v.index(dev_num)]
+        if dev_num in gv.site_list:
+            gv.site_list[gv.site_list.index(dev_num)] = 0
 
-        if site_num_old != -1:
-            del gv.site_dict[site_num_old]
-
-        gv.site_dict[site_num] = dev_num
+        gv.site_list[site_num] = dev_num
 
         # 一些图形操作
         print(gv.name_dict[dev_num], ' 加入了 ', site_num, ' 号座位')
+        print('site_list', gv.site_list)
 
 
 def told_game_start():
@@ -161,36 +160,28 @@ def told_game_start():
     #     print('本局游戏已经开始了，你可（zhi）以（neng）旁观')
 
 
-# def told_card_dict(msg):
-#     '''
-#         -12号消息
-#         0，自己设备号，消息号，1 + 手牌个数，[自己/其他人设备号,[手牌id,手牌类别号],...]
-#     '''
-#     bs = msg.msg
-#     len0 = int((msg.len - 1) / 2)
-#     dev_num = bs[0]
+def told_card_list(msg):
+    '''
+        -3号消息
+        0，自己设备号，-3，[自己/他人的设备号,[手牌类别号,...]]
+    '''
+    bs = msg.msg
+    dev_num = bs[0]
+    card_list = []
+    for i in range(bs.__len__()-1):
+        card_list.append(bs[i+1])
 
-#     card_dict = defaultdict(list)
-#     for i in range(len0):
-#         card_id = bs[1+i*2]
-#         card_type = bs[2+i*2]
-#         card_dict[card_id] = card_type
+    if dev_num == gv.dev_num:
+        gv.card_list = card_list
 
-#     if dev_num == gv.dev_num:
-#         gv.card_dict = card_dict
+        # 一些图形操作
+        print('初始手牌: ', card_list)
 
-#         # 一些图形操作
-#         print('初始手牌: ')
-#         for card_id in card_dict.keys():
-#             print('ID,Type', card_id, card_dict[card_id])
+    else:
 
-#     else:
-
-#         # 一些图形操作
-#         name = gv.name_dict[dev_num]
-#         print(name, '的手牌: ')
-#         for card_id in card_dict.keys():
-#             print('ID,Type', card_id, card_dict[card_id])
+        # 一些图形操作
+        name = gv.name_dict[dev_num]
+        print(name, '的手牌: ', card_list)
 
 
 ''' ''' ''' ''' ''' ''' ''' ''' ''' answer ''' ''' ''' ''' ''' ''' ''' ''' '''
@@ -220,15 +211,19 @@ def answer_site_set(ok, msg):
         缓存的2号消息
         自己设备号，0，2，座位号
     '''
-
     site_num = msg.msg[0]
 
     if ok:
+
+        if(gv.site_num != -1):
+            gv.site_list[gv.site_num] = 0
+
         gv.site_num = site_num
-        gv.site_dict[site_num] = gv.dev_num
+        gv.site_list[site_num] = gv.dev_num
 
         # 一些图形操作
         print('你加入', site_num, '号座位成功')
+        print('site_list', gv.site_list)
 
     else:
 

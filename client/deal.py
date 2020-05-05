@@ -12,7 +12,6 @@ word = ''
 
 def init():
     threading.Thread(target=keyboard_thread, args=()).start()
-    com.connect()
 
 
 def keyboard_thread():
@@ -64,7 +63,7 @@ def deal_keyboard():
 
                 # 进入游戏大厅
                 if cmd_list[0] == '/login':
-                    gv.game_page = 1
+                    gamectrl.require_login()
 
                 # 修改昵称
                 elif cmd_list[0] == '/name':
@@ -94,19 +93,19 @@ def deal_keyboard():
 
                     # 方便测试，自动输入加入房间后的各类指令
                     if cmd_list[1] == '0':
-                        gv.game_page = 1
+                        # gv.game_page = 1
                         gamectrl.require_name_set('a')
                         gamectrl.require_site_set(0)
                     elif cmd_list[1] == '1':
-                        gv.game_page = 1
+                        # gv.game_page = 1
                         gamectrl.require_name_set('b')
                         gamectrl.require_site_set(1)
                     elif cmd_list[1] == '2':
-                        gv.game_page = 1
+                        # gv.game_page = 1
                         gamectrl.require_name_set('c')
                         gamectrl.require_site_set(2)
                     elif cmd_list[1] == '3':
-                        gv.game_page = 1
+                        # gv.game_page = 1
                         gamectrl.require_name_set('d')
                         gamectrl.require_site_set(3)
 
@@ -123,6 +122,7 @@ def deal_msg():
         mm.BYTE2MSG(m.msg)
         dev_num = mm.send
         t = m.type
+        # 答复类消息
         if t == 0 or t == -1:
             if dev_num == gv.dev_num:
                 tt = mm.type
@@ -132,6 +132,7 @@ def deal_msg():
                     gamectrl.answer_site_set(t + 1, mm)
                 elif tt == 3:
                     gamectrl.answer_game_start(t + 1)
+        # 转达-通知类消息
         elif t == -2:
             if dev_num != gv.dev_num:
                 t = mm.type
@@ -141,3 +142,7 @@ def deal_msg():
                     gamectrl.told_site_set(mm)
                 elif t == 3:
                     gamectrl.told_game_start()
+
+        # 告知-通知类消息
+        elif t == -3:
+            gamectrl.told_card_list(m)
