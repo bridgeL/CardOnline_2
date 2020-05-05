@@ -3,11 +3,26 @@ import globalvalue as gv
 import gamectrl
 
 import threading
+import time
 
 # 单文件全局变量
 
 # 按键输入
 word = ''
+
+
+def justfortest(name, num):
+    '''
+        仅用于调试，请在之后删除
+    '''
+    gamectrl.require_login()
+    time.sleep(0.5)
+    gamectrl.require_name_set(name)
+    time.sleep(0.5)
+    gamectrl.require_site_set(num)
+    time.sleep(0.5)
+    if num == 0:
+        gamectrl.require_game_start()
 
 
 def init():
@@ -93,22 +108,17 @@ def deal_keyboard():
 
                     # 方便测试，自动输入加入房间后的各类指令
                     if cmd_list[1] == '0':
-                        # gv.game_page = 1
-                        gamectrl.require_name_set('a')
-                        gamectrl.require_site_set(0)
+                        threading.Thread(target=justfortest,
+                                         args=('a', 0)).start()
                     elif cmd_list[1] == '1':
-                        # gv.game_page = 1
-                        gamectrl.require_name_set('b')
-                        gamectrl.require_site_set(1)
+                        threading.Thread(target=justfortest,
+                                         args=('b', 1)).start()
                     elif cmd_list[1] == '2':
-                        # gv.game_page = 1
-                        gamectrl.require_name_set('c')
-                        gamectrl.require_site_set(2)
+                        threading.Thread(target=justfortest,
+                                         args=('c', 2)).start()
                     elif cmd_list[1] == '3':
-                        # gv.game_page = 1
-                        gamectrl.require_name_set('d')
-                        gamectrl.require_site_set(3)
-
+                        threading.Thread(target=justfortest,
+                                         args=('d', 3)).start()
     return 0
 
 
@@ -146,3 +156,5 @@ def deal_msg():
         # 告知-通知类消息
         elif t == -3:
             gamectrl.told_card_list(m)
+        elif t == -4:
+            gamectrl.told_game_room(m)

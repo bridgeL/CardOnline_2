@@ -1,4 +1,3 @@
-# import globalvalue as gv
 import deal
 # import draw
 

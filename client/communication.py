@@ -69,18 +69,18 @@ def listen_thread():
 
         # 根据信息尾标，进行信息分割
         bs_list = bs.split(msg_end_flag)
+        bs_list.pop()
         # print(bs_list)
         for b in bs_list:
-            if b.__len__() > 0:
-                msg = GAMEMSG(0, 0, 0, bytes([]))
-                msg.BYTE2MSG(b)
-                gv.msg_list.append(msg)
-                # print(['debug recv:', msg.MSG2BYTE()])
+            msg = GAMEMSG(0, 0, 0, bytes([]))
+            msg.BYTE2MSG(b)
+            gv.msg_list.append(msg)
+            # print(['debug recv:', msg.MSG2BYTE()])
 
-                if msg.type == 11:
-                    conn.close()
-                    flag = False
-                    break
+            if msg.type == 11:
+                conn.close()
+                flag = False
+                break
 
 
 def send(msg):

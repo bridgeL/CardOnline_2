@@ -74,3 +74,5 @@ def deal_msg():
             gamectrl.answer_game_start(m)
         elif t == 11:
             gamectrl.answer_exit(m)
+        elif t == 10:
+            gamectrl.answer_login(m)

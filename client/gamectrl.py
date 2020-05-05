@@ -6,8 +6,9 @@ import communication as com
 
 
 def require_login():
-    gv.game_page = 1
     com.connect()
+    m = com.GAMEMSG(gv.dev_num, 0, 10, bytes([]))
+    com.send(m)
 
 
 def require_name_set(name):
@@ -40,18 +41,25 @@ def require_site_set(site_num):
 
     if gv.game_page == 1:
 
-        m = com.GAMEMSG(gv.dev_num, 0, 2, bytes([site_num]))
-        com.send(m)
-
-        if gv.site_num == -1:
+        if gv.name == '':
 
             # 一些图形操作
-            print('锁定座位中')
+            print('起名后才能选座')
 
         else:
 
-            # 一些图形操作
-            print('尝试换位中')
+            m = com.GAMEMSG(gv.dev_num, 0, 2, bytes([site_num]))
+            com.send(m)
+
+            if gv.site_num == -1:
+
+                # 一些图形操作
+                print('锁定座位中')
+
+            else:
+
+                # 一些图形操作
+                print('尝试换位中')
 
 
 def require_game_start():
@@ -108,6 +116,27 @@ def require_game_start():
 
 
 ''' ''' ''' ''' ''' ''' ''' ''' ''' told ''' ''' ''' ''' ''' ''' ''' ''' '''
+
+
+def told_game_room(msg):
+    gv.game_page = 1
+    bs = msg.msg
+    div_flag = bytes([253])
+    bs_list = bs.split(div_flag)
+    bs_list.pop()
+
+    for dev_num in bs_list[0]:
+        gv.dev_num_list.append(dev_num)
+
+    cnt = 2
+    for i in range(bs_list[1].__len__()):
+        gv.name_dict[bs_list[1][i]] = bs_list[cnt].decode()
+        cnt = cnt + 1
+
+    for i in range(bs_list[cnt].__len__()):
+        gv.site_list[i] = bs_list[cnt][i]
+
+    print(gv.dev_num_list, gv.name_dict, gv.site_list)
 
 
 def told_name_set(msg):

@@ -2,6 +2,22 @@ import globalvalue as gv
 import communication as com
 
 
+def answer_login(msg):
+    '''
+        10号消息
+        客户端设备号，0，10
+    '''
+    div_flag = bytes([253])
+    dev_num = msg.send
+    bs = bytes(gv.dev.dict.keys()) + div_flag + \
+        bytes(gv.name_dict.keys()) + div_flag
+    for v in gv.name_dict.values():
+        bs = bs + v.encode() + div_flag
+    bs = bs + bytes(gv.site_list) + div_flag
+    m = com.GAMEMSG(0, dev_num, -4, bs)
+    com.send(m)
+
+
 def answer_exit(msg):
     '''
         11号消息
@@ -45,7 +61,7 @@ def answer_site_set(msg):
     bs = msg.MSG2BYTE()
     site_num = msg.msg[0]
 
-    if gv.game_page == 1 and site_num < 8:
+    if gv.game_page == 1 and site_num < 8 and gv.name_dict[dev_num] != '':
 
         # 非空座
         if gv.site_list[site_num] != 0:

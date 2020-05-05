@@ -6,6 +6,9 @@ msg_list = []
 # 被分配的设备号
 dev_num = 0
 
+# 连接号列表
+dev_num_list = []
+
 # 游戏页
 game_page = 0
 '''
